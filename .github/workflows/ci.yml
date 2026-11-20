@@ -28,7 +28,32 @@ jobs:
           pip install -r usuarios-service/requirements.txt
           pip install -r catalogo-service/requirements.txt
           pip install -r recomendaciones-service/requirements.txt
-          pip install pytest httpx
+          pip install pytest httpx ruff
+
+
+      # ANÁLISIS PYTHON
+
+      - name: Analizar código Python con Ruff
+        run: |
+          python -m ruff check usuarios-service catalogo-service recomendaciones-service tests
+
+      # ANÁLISIS DOCKERFILES
+
+      - name: Analizar Dockerfile de Usuarios
+        uses: hadolint/hadolint-action@v3.5.0
+        with:
+          dockerfile: usuarios-service/Dockerfile
+
+      - name: Analizar Dockerfile de Catálogo
+        uses: hadolint/hadolint-action@v3.5.0
+        with:
+          dockerfile: catalogo-service/Dockerfile
+
+      - name: Analizar Dockerfile de Recomendaciones
+        uses: hadolint/hadolint-action@v3.5.0
+        with:
+          dockerfile: recomendaciones-service/Dockerfile
+
 
       # PRUEBAS UNITARIAS
 

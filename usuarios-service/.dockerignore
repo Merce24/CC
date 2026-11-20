@@ -1,0 +1,25 @@
+# Archivos temporales de Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Entornos virtuales
+.venv/
+venv/
+
+# Pruebas y caché
+tests/
+.pytest_cache/
+.coverage
+
+# Git
+.git/
+.gitignore
+
+# Variables sensibles
+.env
+.env.*
+
+# Archivos de desarrollo
+.vscode/
+.idea/

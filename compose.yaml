@@ -1,0 +1,104 @@
+
+services:
+
+  # MICROSERVICIO DE USUARIOS
+  usuarios:
+    build:
+      context: ./usuarios-service
+      dockerfile: Dockerfile
+    image: usuarios-service:1.0.0
+    ports:
+      - "127.0.0.1:8001:8001"
+    networks:
+      - red-aplicacion
+      - red-usuarios
+    environment:
+      DATABASE_URL: postgresql://${USUARIOS_DB_USER}:${USUARIOS_DB_PASSWORD}@postgres-usuarios:5432/${USUARIOS_DB_NAME}
+    depends_on:
+      postgres-usuarios:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # MICROSERVICIO DE CATÁLOGO
+  catalogo:
+    build:
+      context: ./catalogo-service
+      dockerfile: Dockerfile
+    image: catalogo-service:1.0.0
+    ports:
+      - "127.0.0.1:8002:8002"
+    networks:
+      - red-aplicacion
+      - red-catalogo
+    environment:
+      DATABASE_URL: postgresql://${CATALOGO_DB_USER}:${CATALOGO_DB_PASSWORD}@postgres-catalogo:5432/${CATALOGO_DB_NAME}
+    depends_on:
+      postgres-catalogo:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # MICROSERVICIO DE RECOMENDACIONES
+  recomendaciones:
+    build:
+      context: ./recomendaciones-service
+      dockerfile: Dockerfile
+    image: recomendaciones-service:1.0.0
+    ports:
+      - "127.0.0.1:8003:8003"
+    networks:
+      - red-aplicacion
+    restart: unless-stopped
+
+  # BASE DE DATOS DE USUARIOS
+  postgres-usuarios:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${USUARIOS_DB_NAME}
+      POSTGRES_USER: ${USUARIOS_DB_USER}
+      POSTGRES_PASSWORD: ${USUARIOS_DB_PASSWORD}
+    volumes:
+      - datos-usuarios:/var/lib/postgresql/data
+    networks:
+      - red-usuarios
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # BASE DE DATOS DE CATÁLOGO
+  postgres-catalogo:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${CATALOGO_DB_NAME}
+      POSTGRES_USER: ${CATALOGO_DB_USER}
+      POSTGRES_PASSWORD: ${CATALOGO_DB_PASSWORD}
+    volumes:
+      - datos-catalogo:/var/lib/postgresql/data
+    networks:
+      - red-catalogo
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+# REDES
+networks:
+  red-aplicacion:
+    driver: bridge
+
+  red-usuarios:
+    driver: bridge
+    internal: true
+
+  red-catalogo:
+    driver: bridge
+    internal: true
+
+# ALMACENAMIENTO PERSISTENTE
+volumes:
+  datos-usuarios:
+  datos-catalogo:

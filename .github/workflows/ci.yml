@@ -75,7 +75,10 @@ jobs:
         run: cp .env.example .env
 
       - name: Levantar contenedores
-        run: docker compose up -d --build --wait
+        run: docker compose up -d --build --wait --wait-timeout 120
+
+      - name: Comprobar estado de contenedores
+        run: docker compose ps
 
       - name: Ejecutar pruebas de integración
         run: python -m pytest tests/test_integracion.py -v

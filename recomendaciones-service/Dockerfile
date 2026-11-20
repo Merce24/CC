@@ -26,11 +26,12 @@ COPY --from=builder /install /usr/local
 # Copiar el código del microservicio
 COPY app/ ./app/
 
-# Crear usuario sin privilegios
-RUN groupadd --system appuser \
-    && useradd --system --gid appuser appuser
+# Crear usuario sin privilegios con UID y GID fijos
+RUN groupadd --gid 10001 appuser \
+    && useradd --uid 10001 --gid 10001 --no-create-home appuser
 
-USER appuser
+# Ejecutar sin privilegios de root
+USER 10001:10001
 
 # Puerto del microservicio
 EXPOSE 8003

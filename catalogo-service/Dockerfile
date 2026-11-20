@@ -4,12 +4,13 @@ FROM python:3.13-slim AS builder
 
 WORKDIR /build
 
-# Instalar dependencias
-COPY requirements.txt .
+# Copiar dependencias con versiones fijadas
+COPY requirements.lock.txt .
 
+# Instalar versiones exactas
 RUN pip install --no-cache-dir \
     --prefix=/install \
-    -r requirements.txt
+    -r requirements.lock.txt
 
 
 # ETAPA 2: Ejecución

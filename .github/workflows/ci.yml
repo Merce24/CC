@@ -22,13 +22,19 @@ jobs:
         with:
           python-version: "3.13"
 
+      
       - name: Instalar dependencias
         run: |
           python -m pip install --upgrade pip
-          pip install -r usuarios-service/requirements.txt
-          pip install -r catalogo-service/requirements.txt
-          pip install -r recomendaciones-service/requirements.txt
-          pip install pytest httpx ruff
+
+          # Dependencias de los microservicios
+          python -m pip install -r usuarios-service/requirements.lock.txt
+          python -m pip install -r catalogo-service/requirements.lock.txt
+          python -m pip install -r recomendaciones-service/requirements.lock.txt
+
+          # Herramientas de pruebas y calidad
+          python -m pip install pytest httpx ruff
+
 
 
       # ANÁLISIS PYTHON

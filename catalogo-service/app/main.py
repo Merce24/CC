@@ -4,7 +4,6 @@ from psycopg import OperationalError
 
 from app.database import comprobar_conexion_bd
 
-
 app = FastAPI(
     title="Microservicio de Catálogo",
     description="Gestión del catálogo de juegos de mesa, mecánicas y categorías",

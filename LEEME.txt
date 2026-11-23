@@ -1,0 +1,41 @@
+IMPORTACION INICIAL DEL CATALOGO DE JUEGOS
+=========================================
+
+CONTENIDO
+- catalogo-service/sql/001_catalogo.sql : esquema inicial PostgreSQL
+- catalogo-service/scripts/importar_catalogo.py : importador idempotente
+- datos/catalogo_seed.db : base SQLite saneada (SOLO catalogo, sin usuarios)
+
+COMO USARLO
+1. Extrae este ZIP en la carpeta raiz de tu proyecto CC, de modo que
+   los directorios catalogo-service/ y datos/ queden dentro de CC.
+   Se añaden archivos; no se deben reemplazar Dockerfiles existentes.
+
+2. Añade a .gitignore la linea:
+   datos/catalogo_seed.db
+   Los scripts y esquema SQL si deben versionarse en Git.
+
+3. En PowerShell, desde la raiz de CC, asegura que PostgreSQL funciona:
+   docker compose up -d postgres-catalogo
+
+4. Ejecuta la importacion usando el catalogo-service existente:
+   docker compose run --rm -v "${PWD}/catalogo-service/scripts:/scripts:ro" -v "${PWD}/catalogo-service/sql:/sql:ro" -v "${PWD}/datos:/datos:ro" --entrypoint python catalogo /scripts/importar_catalogo.py --fuente /datos/catalogo_seed.db --esquema /sql/001_catalogo.sql
+
+5. Resultado previsto:
+   juegos: 1087
+   categorias: 80
+   mecanicas: 187
+   juego_categoria: 3529
+   juego_mecanica: 8043
+
+NOTAS
+- No incluye usuarios, contrasenas, comentarios ni mensajes de soporte.
+- Es repetible: INSERT ... ON CONFLICT actualiza juegos existentes y evita
+  duplicados en las relaciones. No borra registros ajenos al fichero.
+- No necesita SQLAlchemy/Alembic para esta PRIMERA carga: solo psycopg,
+  que ya estaba incluido en el servicio. El esquema inicial debera
+  integrarse despues en Alembic para mantener migraciones versionadas.
+- No copies la base SQLite original (con usuarios) al VPS ni al repositorio.
+- Si alguna tabla ya existe con distinta estructura, revisala antes.
+- La importacion no publica una API de juegos por si misma; ese sera
+  el siguiente paso.

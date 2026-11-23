@@ -1,4 +1,4 @@
-
+from app.routes.juegos import router as juegos_router
 from fastapi import FastAPI, HTTPException
 from psycopg import OperationalError
 
@@ -9,6 +9,8 @@ app = FastAPI(
     description="Gestión del catálogo de juegos de mesa, mecánicas y categorías",
     version="1.0.0"
 )
+
+app.include_router(juegos_router)
 
 
 @app.get("/")

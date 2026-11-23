@@ -67,6 +67,11 @@ services:
       - "127.0.0.1:8003:8003"
     networks:
       - red-aplicacion
+    environment:
+      CATALOGO_URL: http://catalogo:8002
+    depends_on:
+      catalogo:
+        condition: service_healthy  
     healthcheck:
       test:
         - CMD
@@ -78,6 +83,7 @@ services:
       retries: 10
       start_period: 10s
     restart: unless-stopped
+    
 
   # BASE DE DATOS DE USUARIOS
   postgres-usuarios:

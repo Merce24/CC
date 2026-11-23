@@ -1,9 +1,9 @@
 
 import os
 from logging.config import fileConfig
-from app.models import Base
 
 from alembic import context
+from app.models import Base
 from sqlalchemy import create_engine, pool
 
 # Configuración de Alembic

@@ -2,8 +2,8 @@
 import os
 
 import psycopg
-from psycopg.rows import dict_row
 from fastapi import APIRouter, HTTPException, Query
+from psycopg.rows import dict_row
 
 router = APIRouter(prefix="/api/v1/games", tags=["Juegos"])
 
@@ -37,16 +37,15 @@ def listar_juegos(
     with psycopg.connect(
         os.environ["DATABASE_URL"],
         row_factory=dict_row,
-    ) as conexion:
-        with conexion.cursor() as cursor:
-            cursor.execute(
-                f"SELECT COUNT(*) AS total FROM juegos {where}",
-                parametros,
-            )
-            total = cursor.fetchone()["total"]
+    ) as conexion, conexion.cursor() as cursor:
+        cursor.execute(
+            f"SELECT COUNT(*) AS total FROM juegos {where}",
+            parametros,
+        )
+        total = cursor.fetchone()["total"]
 
-            cursor.execute(
-                f"""
+        cursor.execute(
+            f"""
                 SELECT
                     id_bgg,
                     nombre,
@@ -63,9 +62,9 @@ def listar_juegos(
                 ORDER BY nombre, id_bgg
                 LIMIT %s OFFSET %s
                 """,
-                parametros + [limit, offset],
-            )
-            juegos = cursor.fetchall()
+            parametros + [limit, offset],
+        )
+        juegos = cursor.fetchall()
 
     return {
         "total": total,
@@ -82,30 +81,29 @@ def obtener_juego(bgg_id: int):
     with psycopg.connect(
         os.environ["DATABASE_URL"],
         row_factory=dict_row,
-    ) as conexion:
-        with conexion.cursor() as cursor:
+    ) as conexion, conexion.cursor() as cursor:
 
-            # Información principal del juego
-            cursor.execute(
-                """
+        # Información principal del juego
+        cursor.execute(
+            """
                 SELECT *
                 FROM juegos
                 WHERE id_bgg = %s
                 """,
-                (bgg_id,),
+            (bgg_id,),
+        )
+
+        juego = cursor.fetchone()
+
+        if juego is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Juego no encontrado",
             )
 
-            juego = cursor.fetchone()
-
-            if juego is None:
-                raise HTTPException(
-                    status_code=404,
-                    detail="Juego no encontrado",
-                )
-
-            # Mecánicas asociadas al juego
-            cursor.execute(
-                """
+        # Mecánicas asociadas al juego
+        cursor.execute(
+            """
                 SELECT m.id, m.nombre
                 FROM mecanicas m
                 JOIN juego_mecanica jm
@@ -113,14 +111,14 @@ def obtener_juego(bgg_id: int):
                 WHERE jm.juego_id = %s
                 ORDER BY m.nombre
                 """,
-                (bgg_id,),
-            )
+            (bgg_id,),
+        )
 
-            mecanicas = cursor.fetchall()
+        mecanicas = cursor.fetchall()
 
-            # Categorías asociadas al juego
-            cursor.execute(
-                """
+        # Categorías asociadas al juego
+        cursor.execute(
+            """
                 SELECT c.id, c.nombre
                 FROM categorias c
                 JOIN juego_categoria jc
@@ -128,10 +126,10 @@ def obtener_juego(bgg_id: int):
                 WHERE jc.juego_id = %s
                 ORDER BY c.nombre
                 """,
-                (bgg_id,),
-            )
+            (bgg_id,),
+        )
 
-            categorias = cursor.fetchall()
+        categorias = cursor.fetchall()
 
     return {
         **juego,

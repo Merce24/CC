@@ -1,5 +1,6 @@
 
 from fastapi import FastAPI
+
 from app.routes.recomendaciones import router as recomendaciones_router
 
 app = FastAPI(

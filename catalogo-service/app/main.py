@@ -1,8 +1,8 @@
-from app.routes.juegos import router as juegos_router
 from fastapi import FastAPI, HTTPException
 from psycopg import OperationalError
 
 from app.database import comprobar_conexion_bd
+from app.routes.juegos import router as juegos_router
 
 app = FastAPI(
     title="Microservicio de Catálogo",

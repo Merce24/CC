@@ -56,7 +56,7 @@ COLUMNAS_JUEGOS = (
 def filas_sqlite(origen, tabla, columnas):
     """Lee las columnas indicadas sin depender del orden de SQLite."""
     consulta = 'SELECT {} FROM "{}"'.format(
-        ", ".join('"{}"'.format(c) for c in columnas), tabla
+        ", ".join(f'"{c}"' for c in columnas), tabla
     )
     return origen.execute(consulta).fetchall()
 
@@ -125,22 +125,21 @@ def importar(fuente, esquema):
                 ("juego_id", "mecanica_id"), ("juego_id", "mecanica_id"), ()
             ),
         }
-        with psycopg.connect(dsn) as destino:
-            with destino.cursor() as cursor:
-                cursor.execute(esquema.read_text(encoding="utf-8"))
-                for tabla, (columnas, conflicto, actualizar) in configuracion.items():
-                    filas = filas_sqlite(origen, tabla, columnas)
-                    cursor.executemany(
-                        upsert(cursor, tabla, columnas, conflicto, actualizar), filas
-                    )
-                    print(f"{tabla}: {len(filas)} registros procesados")
-                print("\nComprobación final en PostgreSQL:")
-                for tabla in TABLAS:
-                    cursor.execute(
-                        sql.SQL("SELECT COUNT(*) FROM {}").format(sql.Identifier(tabla))
-                    )
-                    total = cursor.fetchone()[0]
-                    print(f"  {tabla}: {total}")
+        with psycopg.connect(dsn) as destino, destino.cursor() as cursor:
+            cursor.execute(esquema.read_text(encoding="utf-8"))
+            for tabla, (columnas, conflicto, actualizar) in configuracion.items():
+                filas = filas_sqlite(origen, tabla, columnas)
+                cursor.executemany(
+                    upsert(cursor, tabla, columnas, conflicto, actualizar), filas
+                )
+                print(f"{tabla}: {len(filas)} registros procesados")
+            print("\nComprobación final en PostgreSQL:")
+            for tabla in TABLAS:
+                cursor.execute(
+                    sql.SQL("SELECT COUNT(*) FROM {}").format(sql.Identifier(tabla))
+                )
+                total = cursor.fetchone()[0]
+                print(f"  {tabla}: {total}")
                 # El contexto de conexión confirma los cambios solo si todo salió bien.
         print("\nImportación completada correctamente.")
     finally:

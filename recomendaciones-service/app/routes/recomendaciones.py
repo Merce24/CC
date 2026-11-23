@@ -90,13 +90,15 @@ def recomendar(solicitud: SolicitudRecomendacion):
         duracion = juego["duracion_maxima"]
         complejidad = juego["complejidad"]
 
-        if solicitud.duracion_maxima is not None:
-            if duracion is None or duracion > solicitud.duracion_maxima:
-                continue
+        if solicitud.duracion_maxima is not None and (
+            duracion is None or duracion > solicitud.duracion_maxima
+        ):
+            continue
 
-        if solicitud.complejidad_maxima is not None:
-            if complejidad is None or complejidad > solicitud.complejidad_maxima:
-                continue
+        if solicitud.complejidad_maxima is not None and (
+            complejidad is None or complejidad > solicitud.complejidad_maxima
+        ):
+            continue
 
         valoracion = float(juego["valoracion_media"] or 0)
 

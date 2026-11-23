@@ -30,39 +30,41 @@ def crear_administrador():
     # Argon2 incorpora una sal aleatoria automáticamente
     password_hash = PasswordHasher().hash(password)
 
-    with psycopg.connect(os.environ["DATABASE_URL"]) as conexion:
-        with conexion.cursor() as cursor:
-            cursor.execute(
-                "SELECT id FROM usuarios WHERE email = %s",
-                (email,),
+    with (
+        psycopg.connect(os.environ["DATABASE_URL"]) as conexion,
+        conexion.cursor() as cursor,
+    ):
+        cursor.execute(
+            "SELECT id FROM usuarios WHERE email = %s",
+            (email,),
+        )
+
+        if cursor.fetchone() is not None:
+            print("Ya existe una cuenta con ese correo.")
+            return
+
+        cursor.execute(
+            """
+            INSERT INTO usuarios (
+                nombre,
+                email,
+                password_hash,
+                rol,
+                activo
             )
+            VALUES (%s, %s, %s, %s, %s)
+            RETURNING id
+            """,
+            (
+                nombre,
+                email,
+                password_hash,
+                "admin",
+                True,
+            ),
+        )
 
-            if cursor.fetchone() is not None:
-                print("Ya existe una cuenta con ese correo.")
-                return
-
-            cursor.execute(
-                """
-                INSERT INTO usuarios (
-                    nombre,
-                    email,
-                    password_hash,
-                    rol,
-                    activo
-                )
-                VALUES (%s, %s, %s, %s, %s)
-                RETURNING id
-                """,
-                (
-                    nombre,
-                    email,
-                    password_hash,
-                    "admin",
-                    True,
-                ),
-            )
-
-            usuario_id = cursor.fetchone()[0]
+        usuario_id = cursor.fetchone()[0]
 
     print(f"Administrador creado correctamente. ID: {usuario_id}")
 
